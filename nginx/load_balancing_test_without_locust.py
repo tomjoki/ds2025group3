@@ -61,12 +61,12 @@ def perform_operations(thread_id):
             with request_counts_lock:
                 request_counts[hostname] += 1
 
-            print(f"Thread {thread_id}, Request {i+1}:")
-            print(f"  Inserted ID: {insert_result.inserted_id}")
-            print(f"  Query Result: {query_result}")
-            print(f"  Server Hostname: {hostname}")
-            print(f"  Response Time: {response_time:.4f} seconds")
-            print("-" * 40)
+            # print(f"Thread {thread_id}, Request {i+1}:")
+            # print(f"  Inserted ID: {insert_result.inserted_id}")
+            # print(f"  Query Result: {query_result}")
+            # print(f"  Server Hostname: {hostname}")
+            # print(f"  Response Time: {response_time:.4f} seconds")
+            # print("-" * 40)
         except Exception as e:
             print(f"Thread {thread_id}, Request {i+1} failed: {e}")
 
