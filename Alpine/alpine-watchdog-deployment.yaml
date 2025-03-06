@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: alpine-watchdog
+  labels:
+    run: alpine-watchdog
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      run: alpine-watchdog
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        run: alpine-watchdog
+    spec:
+      containers:
+      - name: alpine
+        image: alpine:latest
+        command:
+          - /bin/sh
+          - "-c"
+          - "echo 'Hello there Watchdog' > /shared/log.txt && sleep 60m"
+        imagePullPolicy: IfNotPresent
+        name: alpine
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "100m"
+          limits:
+            memory: "128Mi"
+            cpu: "250m"
+        volumeMounts:
+          - name: shared-volume
+            mountPath: /shared
+      - name: watchdog
+        image: tomjoki/wdog-monitor
+        command:
+          - /bin/sh
+          - "-c"
+          - "python monitor.py && sleep 60m"
+        env:
+        - name: KAFKA_BROKER
+          value: "kafka-controller-0.kafka-controller-headless.default.svc.cluster.local:9092"
+        - name: API-KEY
+          value: "apikey"
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "100m"
+          limits:
+            memory: "128Mi"
+            cpu: "250m"
+        volumeMounts:
+          - name: shared-volume
+            mountPath: /monitored
+      volumes:
+        - name: shared-volume
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: alpine-watchdog-service
+spec:
+  selector:
+    run: alpine
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8080
+  type: ClusterIP
